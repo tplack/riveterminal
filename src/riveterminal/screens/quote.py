@@ -12,6 +12,7 @@ from typing import Optional, Dict, Any
 
 from ..data.yahoo import yahoo
 from ..data.news_feeds import news
+from ..data.sec import sec_provider
 from ..utils.formatting import (
     format_price_change, format_currency, format_number, 
     format_ratio, format_time_only, get_change_color
@@ -138,6 +139,67 @@ class QuoteNewsWidget(Static):
         self.update(panel)
 
 
+class QuoteSECWidget(Static):
+    """Widget showing SEC filings for the symbol."""
+    
+    def __init__(self):
+        super().__init__()
+        self.filings_data = None
+        self.symbol = None
+    
+    async def load_filings(self, symbol: str):
+        """Load SEC filings for symbol."""
+        self.symbol = symbol.upper()
+        try:
+            self.filings_data = await sec_provider.search_filings(
+                symbol, 
+                filing_types=["10-K", "10-Q", "8-K"], 
+                limit=10
+            )
+            self.update_display()
+        except Exception as e:
+            self.update(f"Error loading SEC filings: {e}")
+    
+    def update_display(self):
+        """Update the display with filings data."""
+        if not self.filings_data:
+            self.update("No SEC filings found")
+            return
+        
+        content = Text()
+        content.append("🏛️  Recent SEC Filings\n\n", style="bold cyan")
+        
+        for filing in self.filings_data[:8]:  # Show last 8 filings
+            form = filing.get("form", "")
+            file_date = filing.get("file_date", "")
+            description = filing.get("file_description", "")
+            
+            # Format date nicely
+            try:
+                from datetime import datetime
+                date_obj = datetime.strptime(file_date, "%Y-%m-%d")
+                formatted_date = date_obj.strftime("%m/%d/%y")
+            except:
+                formatted_date = file_date
+            
+            content.append(f"{form:>8}: ", style="bold white")
+            content.append(f"{formatted_date}\n", style="yellow")
+            
+            # Truncate description
+            if description and len(description) > 50:
+                description = description[:47] + "..."
+            content.append(f"         {description}\n\n", style="dim white")
+        
+        panel = Panel(
+            content,
+            title=f"🏛️  SEC Filings - {self.symbol}",
+            title_align="left",
+            border_style="green"
+        )
+        
+        self.update(panel)
+
+
 class QuoteScreen(Screen):
     """Quote screen for individual stock details."""
     
@@ -149,6 +211,7 @@ class QuoteScreen(Screen):
         ("f6", "show_news", "News"),
         ("r", "refresh", "Refresh"),
         ("a", "add_to_watchlist", "Add to Watchlist"),
+        ("s", "view_sec_filings", "SEC Filings"),
         ("escape", "back", "Back"),
     ]
     
@@ -175,8 +238,10 @@ class QuoteScreen(Screen):
                 # Main quote details
                 yield QuoteDetailWidget()
                 
-                # News column
-                yield QuoteNewsWidget()
+                # Right column with news and SEC filings
+                with Vertical():
+                    yield QuoteNewsWidget()
+                    yield QuoteSECWidget()
     
     def _get_header(self) -> Panel:
         """Get header panel."""
@@ -213,14 +278,16 @@ class QuoteScreen(Screen):
                 self.update_header()
     
     async def load_quote_data(self):
-        """Load quote and news data."""
+        """Load quote, news, and SEC filings data."""
         quote_widget = self.query_one(QuoteDetailWidget)
         news_widget = self.query_one(QuoteNewsWidget)
+        sec_widget = self.query_one(QuoteSECWidget)
         
-        # Load quote and news in parallel
+        # Load quote, news, and SEC filings in parallel
         await asyncio.gather(
             quote_widget.load_quote(self.current_symbol),
             news_widget.load_news(self.current_symbol),
+            sec_widget.load_filings(self.current_symbol),
             return_exceptions=True
         )
     
@@ -244,6 +311,50 @@ class QuoteScreen(Screen):
                 self.notify(f"{self.current_symbol} already in watchlist")
         except Exception as e:
             self.notify(f"Error adding to watchlist: {e}")
+    
+    def action_view_sec_filings(self):
+        """View SEC filings for current symbol."""
+        try:
+            sec_widget = self.query_one(QuoteSECWidget)
+            asyncio.create_task(sec_widget.load_filings(self.current_symbol))
+            self.notify(f"Loading SEC filings for {self.current_symbol}...")
+        except Exception as e:
+            self.notify(f"Error loading SEC filings: {e}")
+    
+    def action_export_data(self):
+        """Export quote data to CSV."""
+        try:
+            import csv
+            from pathlib import Path
+            from datetime import datetime
+            
+            # Create export directory
+            export_dir = Path.home() / "Downloads" / "riveterminal"
+            export_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = export_dir / f"quote_{self.current_symbol}_{timestamp}.csv"
+            
+            # Get current quote data
+            quote_widget = self.query_one(QuoteDetailWidget)
+            if quote_widget.quote_data:
+                quote = quote_widget.quote_data
+                
+                with open(filename, 'w', newline='') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow(['Field', 'Value'])
+                    
+                    # Write quote data
+                    for key, value in quote.items():
+                        writer.writerow([key, value])
+                
+                self.notify(f"Quote data exported to {filename}")
+            else:
+                self.notify("No quote data to export")
+                
+        except Exception as e:
+            self.notify(f"Error exporting: {e}")
     
     def action_back(self):
         """Go back to previous screen."""

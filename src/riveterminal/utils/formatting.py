@@ -140,3 +140,7 @@ def format_ratio(value: Optional[float], decimals: int = 2) -> str:
     if value is None or value == 0:
         return "N/A"
     return f"{value:.{decimals}f}"
+
+
+# Alias for backward compatibility
+get_color_for_change = get_change_color

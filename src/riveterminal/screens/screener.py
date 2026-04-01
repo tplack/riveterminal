@@ -388,6 +388,52 @@ class ScreenerScreen(Screen):
             'APD', 'PNC', 'CSX', 'EQIX', 'SHW', 'CCI', 'GE', 'ATVI', 'ICE', 'USB'
         ]
     
+    def action_export_data(self) -> None:
+        """Export screener results to CSV."""
+        try:
+            import csv
+            from pathlib import Path
+            from datetime import datetime
+            
+            # Create export directory
+            export_dir = Path.home() / "Downloads" / "riveterminal"
+            export_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = export_dir / f"screener_results_{timestamp}.csv"
+            
+            if not self.filtered_data:
+                self.notify("No screener results to export")
+                return
+            
+            with open(filename, 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                
+                # Headers
+                writer.writerow([
+                    'Symbol', 'Company Name', 'Price', 'Market Cap', 'P/E Ratio', 
+                    'Dividend Yield %', '52-Week Change %', 'Sector'
+                ])
+                
+                # Data rows
+                for stock in self.filtered_data:
+                    writer.writerow([
+                        stock.get('symbol', ''),
+                        stock.get('name', ''),
+                        stock.get('price', 0),
+                        stock.get('market_cap', 0),
+                        stock.get('pe_ratio', 0),
+                        stock.get('dividend_yield', 0),
+                        stock.get('year_change', 0),
+                        stock.get('sector', '')
+                    ])
+            
+            self.notify(f"Screener results exported to {filename}")
+            
+        except Exception as e:
+            self.notify(f"Error exporting screener results: {e}")
+    
     async def on_button_pressed(self, event) -> None:
         """Handle button presses."""
         if event.button.id == "apply-btn":

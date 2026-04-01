@@ -192,3 +192,64 @@ def create_line_chart(data: pd.DataFrame, title: str = "", width: int = 80, heig
     """Create a line chart from DataFrame."""
     renderer = ChartRenderer(width, height)
     return renderer.render_line_chart(data, title)
+
+
+def create_candlestick_chart(data: pd.DataFrame, symbol: str = "", width: int = 80, height: int = 20) -> str:
+    """Create a candlestick chart from OHLCV data."""
+    try:
+        # Simple ASCII candlestick approximation
+        if data.empty or not all(col in data.columns for col in ['Open', 'High', 'Low', 'Close']):
+            return "Missing OHLC data for candlestick chart"
+        
+        chart_lines = []
+        chart_lines.append(f"📊 {symbol} CANDLESTICK CHART")
+        chart_lines.append("─" * width)
+        
+        # Use subset of data to fit width
+        data_subset = data.tail(min(width // 3, len(data)))
+        
+        min_price = data_subset[['Open', 'High', 'Low', 'Close']].min().min()
+        max_price = data_subset[['Open', 'High', 'Low', 'Close']].max().max()
+        price_range = max_price - min_price
+        
+        if price_range == 0:
+            return f"No price variation for {symbol}"
+        
+        # Create simplified candlestick representation
+        for _, row in data_subset.iterrows():
+            open_price = row['Open']
+            high_price = row['High'] 
+            low_price = row['Low']
+            close_price = row['Close']
+            
+            # Determine candle type
+            is_green = close_price > open_price
+            candle_char = "🟢" if is_green else "🔴"
+            
+            # Simple representation
+            date_str = row.name.strftime('%m/%d') if hasattr(row.name, 'strftime') else str(row.name)[:5]
+            price_info = f"{date_str} {candle_char} O:{open_price:.2f} H:{high_price:.2f} L:{low_price:.2f} C:{close_price:.2f}"
+            chart_lines.append(price_info)
+        
+        return "\n".join(chart_lines)
+        
+    except Exception as e:
+        return f"Error creating candlestick chart: {e}"
+
+
+def create_volume_chart(data: pd.DataFrame, width: int = 80, height: int = 8) -> str:
+    """Create a volume bar chart."""
+    try:
+        if data.empty or 'Volume' not in data.columns:
+            return "No volume data available"
+        
+        volumes = data['Volume'].tolist()
+        if not volumes or max(volumes) == 0:
+            return "No volume data"
+        
+        # Use plotext for volume bars
+        renderer = ChartRenderer(width, height)
+        return renderer.render_volume_bars(volumes, width, height)
+        
+    except Exception as e:
+        return f"Error creating volume chart: {e}"

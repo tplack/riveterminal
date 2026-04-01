@@ -15,6 +15,7 @@ src/riveterminal/data/__init__.py
 src/riveterminal/data/coingecko.py
 src/riveterminal/data/fred.py
 src/riveterminal/data/news_feeds.py
+src/riveterminal/data/sec.py
 src/riveterminal/data/yahoo.py
 src/riveterminal/screens/__init__.py
 src/riveterminal/screens/chart.py
@@ -22,6 +23,8 @@ src/riveterminal/screens/crypto.py
 src/riveterminal/screens/dashboard.py
 src/riveterminal/screens/economic.py
 src/riveterminal/screens/news.py
+src/riveterminal/screens/options.py
+src/riveterminal/screens/portfolio.py
 src/riveterminal/screens/quote.py
 src/riveterminal/screens/screener.py
 src/riveterminal/screens/watchlist.py

@@ -326,6 +326,56 @@ class WatchlistScreen(Screen):
         """Switch to news screen."""
         self.app.push_screen("news")
     
+    def action_export_data(self):
+        """Export watchlist data to CSV."""
+        try:
+            import csv
+            from pathlib import Path
+            from datetime import datetime
+            
+            # Create export directory
+            export_dir = Path.home() / "Downloads" / "riveterminal"
+            export_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = export_dir / f"watchlist_{timestamp}.csv"
+            
+            # Get current watchlist data
+            watchlist_table = self.query_one(WatchlistTable)
+            
+            if not watchlist_table.watchlist_data:
+                self.notify("No watchlist data to export")
+                return
+            
+            with open(filename, 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                
+                # Headers
+                writer.writerow([
+                    'Symbol', 'Company Name', 'Price', 'Change', 'Change %', 
+                    'Volume', 'Market Cap', 'P/E Ratio', 'Beta'
+                ])
+                
+                # Data rows
+                for symbol, data in watchlist_table.watchlist_data.items():
+                    writer.writerow([
+                        symbol,
+                        data.get('company_name', ''),
+                        data.get('price', 0),
+                        data.get('change', 0),
+                        data.get('change_percent', 0),
+                        data.get('volume', 0),
+                        data.get('market_cap', 0),
+                        data.get('pe_ratio', 0),
+                        data.get('beta', 0)
+                    ])
+            
+            self.notify(f"Watchlist exported to {filename}")
+            
+        except Exception as e:
+            self.notify(f"Error exporting watchlist: {e}")
+    
     async def on_key(self, event: events.Key):
         """Handle key events."""
         if event.key == "escape" and self.add_symbol_mode:

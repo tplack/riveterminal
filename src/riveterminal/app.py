@@ -18,6 +18,8 @@ from .screens.news import NewsScreen
 from .screens.economic import EconomicScreen
 from .screens.screener import ScreenerScreen
 from .screens.crypto import CryptoScreen
+from .screens.portfolio import PortfolioScreen
+from .screens.options import OptionsScreen
 from .config import get_config
 
 
@@ -124,6 +126,7 @@ Horizontal {
 """
     
     BINDINGS = [
+        ("0", "show_options", "Options"),
         ("1", "show_dashboard", "Dashboard"),
         ("2", "show_quote", "Quote"),
         ("3", "show_watchlist", "Watchlist"),
@@ -131,7 +134,9 @@ Horizontal {
         ("5", "show_economic", "Economic"),
         ("6", "show_news", "News"),
         ("7", "show_screener", "Screener"),
+        ("8", "show_portfolio", "Portfolio"),
         ("9", "show_crypto", "Crypto"),
+        ("e", "export_data", "Export"),
         ("ctrl+c", "quit", "Quit"),
         ("q", "quit", "Quit"),
         ("r", "refresh", "Refresh"),
@@ -151,7 +156,9 @@ Horizontal {
         self.install_screen(EconomicScreen(), name="economic")
         self.install_screen(NewsScreen(), name="news")
         self.install_screen(ScreenerScreen(), name="screener")
+        self.install_screen(PortfolioScreen(), name="portfolio")
         self.install_screen(CryptoScreen(), name="crypto")
+        self.install_screen(OptionsScreen(), name="options")
     
     def compose(self) -> ComposeResult:
         """Compose the main application layout."""
@@ -201,6 +208,12 @@ Horizontal {
             
         elif command in ["SCREENER", "SCREEN", "S"]:
             self.switch_screen("screener")
+            
+        elif command in ["PORTFOLIO", "PORT", "P"]:
+            self.switch_screen("portfolio")
+            
+        elif command in ["OPTIONS", "OPT", "O"]:
+            self.switch_screen("options")
             
         elif command in ["CRYPTO", "CRYPT", "CR"]:
             self.switch_screen("crypto")
@@ -277,6 +290,14 @@ Horizontal {
         """Show stock screener."""
         self.switch_screen("screener")
     
+    def action_show_portfolio(self) -> None:
+        """Show portfolio tracker."""
+        self.switch_screen("portfolio")
+    
+    def action_show_options(self) -> None:
+        """Show options chain."""
+        self.switch_screen("options")
+    
     def action_show_crypto(self) -> None:
         """Show crypto dashboard."""
         self.switch_screen("crypto")
@@ -289,35 +310,50 @@ Horizontal {
         else:
             self.notify("Refreshed")
     
+    def action_export_data(self) -> None:
+        """Export current screen data."""
+        try:
+            current_screen = self.screen
+            if hasattr(current_screen, 'action_export_data'):
+                current_screen.action_export_data()
+            else:
+                self.notify("Export not available for this screen")
+        except Exception as e:
+            self.notify(f"Export error: {e}")
+    
     def action_show_help(self) -> None:
         """Show help information."""
         help_text = """
-RiverTerminal Help
+RiverTerminal Help - Phase 3 Enhanced
 
 Navigation:
+  0 - Options Chain (view options for any stock)
   1 - Dashboard (market overview)
   2 - Quote screen (individual stocks)
   3 - Watchlist (your saved stocks)
-  4 - Charts (price charts)
+  4 - Charts (enhanced with SMA & volume)
   5 - Economic (FRED data, yields)
   6 - News (financial news)
   7 - Screener (stock filters)
+  8 - Portfolio Tracker (manage positions)
   9 - Crypto (cryptocurrency data)
 
 Command Bar:
   / - Focus command bar
   Type ticker symbols (AAPL, MSFT, TSLA) to view quotes
-  Type commands: DASHBOARD, QUOTE, WATCHLIST, CHART, ECON, NEWS
+  Type commands: DASHBOARD, QUOTE, CHART, PORTFOLIO, OPTIONS
   
 General:
   Q or Ctrl+C - Quit application
   R - Refresh current screen
+  E - Export current screen data
   ? - Show this help
   
-Stock Screens:
-  A - Add to watchlist (on quote screen)
-  D - Delete from watchlist
-  Enter - View details/open links
+New Features:
+  Portfolio: Track positions, P&L, allocations
+  Options: View chains, Greeks, expirations  
+  Charts: SMA overlays, volume, multi-ticker
+  Export: Save data to CSV files
 """
         self.notify(help_text)
     
