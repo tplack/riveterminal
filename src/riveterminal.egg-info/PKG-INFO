@@ -1,0 +1,115 @@
+Metadata-Version: 2.4
+Name: riveterminal
+Version: 0.1.0
+Summary: Open-source Bloomberg Terminal TUI built on free data sources
+Author: RiverTerminal Contributors
+License: MIT
+Project-URL: Homepage, https://github.com/rivermortgage/riveterminal
+Project-URL: Repository, https://github.com/rivermortgage/riveterminal
+Project-URL: Issues, https://github.com/rivermortgage/riveterminal/issues
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Financial and Insurance Industry
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Office/Business :: Financial :: Investment
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: textual>=0.63.0
+Requires-Dist: rich>=13.7.0
+Requires-Dist: yfinance>=0.2.18
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: feedparser>=6.0.11
+Requires-Dist: plotext>=5.2.8
+Requires-Dist: pandas>=2.2.0
+Requires-Dist: requests-cache>=1.2.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+Requires-Dist: black>=24.0.0; extra == "dev"
+Requires-Dist: isort>=5.13.0; extra == "dev"
+Requires-Dist: flake8>=7.0.0; extra == "dev"
+Requires-Dist: mypy>=1.8.0; extra == "dev"
+
+# RiverTerminal 📈
+
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+An open-source Bloomberg Terminal TUI built entirely on free data sources. Fast, information-dense financial data terminal for your console.
+
+## Features
+
+### Phase 1 (Current)
+- 📊 **Dashboard**: Market overview with S&P 500, DJIA, NASDAQ, VIX
+- 💰 **Quote Screen**: Full ticker details with fundamentals and news
+- 📝 **Watchlists**: SQLite-backed, real-time price updates
+- 📈 **Charts**: ASCII line charts with multiple timeframes
+- 📰 **News Feed**: RSS aggregation from major financial outlets
+
+### Navigation
+- **Command Bar**: Type `AAPL <Enter>` to jump to Apple's quote
+- **F-Keys**: F1=Dashboard, F2=Quote, F3=Watchlist, F4=Charts, F6=News
+- **Keyboard-driven**: Everything accessible without a mouse
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/rivermortgage/riveterminal.git
+cd riveterminal
+
+# Install in development mode
+pip install -e .
+
+# Run the application
+python -m riveterminal
+```
+
+## Quick Start
+
+1. **Launch**: `python -m riveterminal`
+2. **Navigate**: Use F-keys or command bar
+3. **Search stocks**: Type ticker symbols like `AAPL`, `MSFT`, `TSLA`
+4. **Add to watchlist**: Press `a` on any quote screen
+5. **View charts**: F4 for charts, use 1/2/3 for timeframes
+
+## Data Sources
+
+All data comes from free, publicly available sources:
+- **Yahoo Finance**: Stock quotes, fundamentals, news
+- **RSS Feeds**: Reuters, CNBC, MarketWatch headlines
+- **No API keys required** for basic functionality
+
+## Requirements
+
+- Python 3.12+
+- Terminal with color support
+- Internet connection for real-time data
+
+## Development
+
+```bash
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Format code
+black src/
+isort src/
+
+# Type checking
+mypy src/
+```
+
+## Contributing
+
+See [SPEC.md](SPEC.md) for the full project specification and roadmap.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.

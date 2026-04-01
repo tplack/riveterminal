@@ -1,0 +1,2 @@
+[console_scripts]
+riveterminal = riveterminal.app:main
