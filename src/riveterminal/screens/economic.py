@@ -27,8 +27,8 @@ class EconomicScreen(Screen):
     def __init__(self):
         super().__init__()
         self.fred_provider = get_fred_provider()
-        self.auto_refresh = True
         self.refresh_interval = 300  # 5 minutes
+        self._should_auto_refresh = True  # Internal flag
     
     def compose(self) -> ComposeResult:
         """Compose the economic dashboard layout."""
@@ -48,8 +48,9 @@ class EconomicScreen(Screen):
         """Initialize the screen."""
         await self.refresh_data()
         
-        # Start auto-refresh timer
-        if self.auto_refresh:
+        # Enable auto-refresh now that event loop is running
+        if self._should_auto_refresh:
+            self.auto_refresh = True
             asyncio.create_task(self._auto_refresh_loop())
     
     async def action_refresh(self) -> None:
@@ -270,10 +271,10 @@ class EconomicScreen(Screen):
     
     async def _auto_refresh_loop(self) -> None:
         """Auto-refresh data periodically."""
-        while self.auto_refresh:
+        while self._should_auto_refresh:
             try:
                 await asyncio.sleep(self.refresh_interval)
-                if self.auto_refresh:  # Check again in case it was disabled
+                if self._should_auto_refresh:  # Check again in case it was disabled
                     await self.refresh_data()
             except Exception:
                 break  # Exit loop on error

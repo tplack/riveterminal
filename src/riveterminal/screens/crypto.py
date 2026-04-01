@@ -29,8 +29,8 @@ class CryptoScreen(Screen):
         super().__init__()
         self.selected_coin = None
         self.coins_data = []
-        self.auto_refresh = True
         self.refresh_interval = 60  # 1 minute
+        self._should_auto_refresh = True  # Internal flag
     
     def compose(self) -> ComposeResult:
         """Compose the crypto dashboard layout."""
@@ -55,8 +55,9 @@ class CryptoScreen(Screen):
         await self.refresh_data()
         self.setup_coins_table()
         
-        # Start auto-refresh timer
-        if self.auto_refresh:
+        # Enable auto-refresh now that event loop is running
+        if self._should_auto_refresh:
+            self.auto_refresh = True
             asyncio.create_task(self._auto_refresh_loop())
     
     def setup_coins_table(self) -> None:
@@ -333,10 +334,10 @@ class CryptoScreen(Screen):
     
     async def _auto_refresh_loop(self) -> None:
         """Auto-refresh data periodically."""
-        while self.auto_refresh:
+        while self._should_auto_refresh:
             try:
                 await asyncio.sleep(self.refresh_interval)
-                if self.auto_refresh:  # Check again in case it was disabled
+                if self._should_auto_refresh:  # Check again in case it was disabled
                     await self.refresh_data()
             except Exception:
                 break  # Exit loop on error
