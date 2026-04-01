@@ -15,6 +15,9 @@ from .screens.quote import QuoteScreen
 from .screens.watchlist import WatchlistScreen
 from .screens.chart import ChartScreen
 from .screens.news import NewsScreen
+from .screens.economic import EconomicScreen
+from .screens.screener import ScreenerScreen
+from .screens.crypto import CryptoScreen
 from .config import get_config
 
 
@@ -121,13 +124,17 @@ Horizontal {
 """
     
     BINDINGS = [
-        ("f1", "show_dashboard", "Dashboard"),
-        ("f2", "show_quote", "Quote"),
-        ("f3", "show_watchlist", "Watchlist"),
-        ("f4", "show_chart", "Chart"),
-        ("f6", "show_news", "News"),
+        ("1", "show_dashboard", "Dashboard"),
+        ("2", "show_quote", "Quote"),
+        ("3", "show_watchlist", "Watchlist"),
+        ("4", "show_chart", "Chart"),
+        ("5", "show_economic", "Economic"),
+        ("6", "show_news", "News"),
+        ("7", "show_screener", "Screener"),
+        ("9", "show_crypto", "Crypto"),
         ("ctrl+c", "quit", "Quit"),
         ("q", "quit", "Quit"),
+        ("r", "refresh", "Refresh"),
         ("?", "show_help", "Help"),
     ]
     
@@ -141,7 +148,10 @@ Horizontal {
         self.install_screen(QuoteScreen(), name="quote")
         self.install_screen(WatchlistScreen(), name="watchlist")
         self.install_screen(ChartScreen(), name="chart")
+        self.install_screen(EconomicScreen(), name="economic")
         self.install_screen(NewsScreen(), name="news")
+        self.install_screen(ScreenerScreen(), name="screener")
+        self.install_screen(CryptoScreen(), name="crypto")
     
     def compose(self) -> ComposeResult:
         """Compose the main application layout."""
@@ -185,6 +195,15 @@ Horizontal {
             
         elif command in ["NEWS", "N"]:
             self.switch_screen("news")
+            
+        elif command in ["ECONOMIC", "ECON", "E"]:
+            self.switch_screen("economic")
+            
+        elif command in ["SCREENER", "SCREEN", "S"]:
+            self.switch_screen("screener")
+            
+        elif command in ["CRYPTO", "CRYPT", "CR"]:
+            self.switch_screen("crypto")
             
         elif command in ["HELP", "?", "H"]:
             self.action_show_help()
@@ -250,21 +269,45 @@ Horizontal {
         """Show news screen."""
         self.switch_screen("news")
     
+    def action_show_economic(self) -> None:
+        """Show economic dashboard."""
+        self.switch_screen("economic")
+    
+    def action_show_screener(self) -> None:
+        """Show stock screener."""
+        self.switch_screen("screener")
+    
+    def action_show_crypto(self) -> None:
+        """Show crypto dashboard."""
+        self.switch_screen("crypto")
+    
+    def action_refresh(self) -> None:
+        """Refresh current screen."""
+        current_screen = self.screen
+        if hasattr(current_screen, 'refresh'):
+            current_screen.refresh()
+        else:
+            self.notify("Refreshed")
+    
     def action_show_help(self) -> None:
         """Show help information."""
         help_text = """
 RiverTerminal Help
 
 Navigation:
-  F1 - Dashboard (market overview)
-  F2 - Quote screen (individual stocks)
-  F3 - Watchlist (your saved stocks)
-  F4 - Charts (price charts)
-  F6 - News (financial news)
+  1 - Dashboard (market overview)
+  2 - Quote screen (individual stocks)
+  3 - Watchlist (your saved stocks)
+  4 - Charts (price charts)
+  5 - Economic (FRED data, yields)
+  6 - News (financial news)
+  7 - Screener (stock filters)
+  9 - Crypto (cryptocurrency data)
 
 Command Bar:
+  / - Focus command bar
   Type ticker symbols (AAPL, MSFT, TSLA) to view quotes
-  Type commands: DASHBOARD, QUOTE, WATCHLIST, CHART, NEWS
+  Type commands: DASHBOARD, QUOTE, WATCHLIST, CHART, ECON, NEWS
   
 General:
   Q or Ctrl+C - Quit application
@@ -286,7 +329,12 @@ Stock Screens:
             command_bar.focus()
             event.prevent_default()
         else:
-            await super().on_key(event)
+            try:
+                # Try to handle the key with parent, but don't crash on undefined keys
+                await super().on_key(event)
+            except Exception:
+                # Silently ignore undefined key presses to prevent crashes
+                pass
 
 
 def main() -> None:

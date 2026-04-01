@@ -25,6 +25,8 @@ Requires-Dist: feedparser>=6.0.11
 Requires-Dist: plotext>=5.2.8
 Requires-Dist: pandas>=2.2.0
 Requires-Dist: requests-cache>=1.2.0
+Requires-Dist: fredapi>=0.5.1
+Requires-Dist: aiohttp>=3.9.0
 Provides-Extra: dev
 Requires-Dist: pytest>=8.0.0; extra == "dev"
 Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"

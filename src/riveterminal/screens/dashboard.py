@@ -149,11 +149,14 @@ class DashboardScreen(Screen):
     """Main dashboard screen."""
     
     BINDINGS = [
-        ("f1", "show_dashboard", "Dashboard"),
-        ("f2", "show_quote", "Quote"),
-        ("f3", "show_watchlist", "Watchlist"),
-        ("f4", "show_chart", "Chart"),
-        ("f6", "show_news", "News"),
+        ("1", "show_dashboard", "Dashboard"),
+        ("2", "show_quote", "Quote"),
+        ("3", "show_watchlist", "Watchlist"),
+        ("4", "show_chart", "Chart"),
+        ("5", "show_economic", "Economic"),
+        ("6", "show_news", "News"),
+        ("7", "show_screener", "Screener"),
+        ("9", "show_crypto", "Crypto"),
         ("r", "refresh", "Refresh"),
     ]
     
@@ -198,15 +201,19 @@ class DashboardScreen(Screen):
         info_text = Text()
         info_text.append("📈 Welcome to RiverTerminal\n\n", style="bold cyan")
         info_text.append("Navigation:\n", style="bold white")
-        info_text.append("• F1: Dashboard (current)\n", style="white")
-        info_text.append("• F2: Quote screen\n", style="white")
-        info_text.append("• F3: Watchlist\n", style="white")
-        info_text.append("• F4: Charts\n", style="white")
-        info_text.append("• F6: News\n", style="white")
+        info_text.append("• 1: Dashboard (current)\n", style="white")
+        info_text.append("• 2: Quote screen\n", style="white")
+        info_text.append("• 3: Watchlist\n", style="white")
+        info_text.append("• 4: Charts\n", style="white")
+        info_text.append("• 5: Economic (FRED data)\n", style="white")
+        info_text.append("• 6: News\n", style="white")
+        info_text.append("• 7: Screener (stock filters)\n", style="white")
+        info_text.append("• 9: Crypto dashboard\n", style="white")
         info_text.append("• R: Refresh data\n\n", style="white")
         info_text.append("Command Bar:\n", style="bold white")
+        info_text.append("• /: Focus command bar\n", style="white")
         info_text.append("Type ticker symbols (AAPL, MSFT)\n", style="white")
-        info_text.append("or commands (DASHBOARD, NEWS)\n", style="white")
+        info_text.append("or commands (ECON, CRYPTO)\n", style="white")
         
         return Panel(
             info_text,
@@ -263,3 +270,15 @@ class DashboardScreen(Screen):
     def action_show_news(self):
         """Switch to news screen."""
         self.app.push_screen("news")
+    
+    def action_show_economic(self):
+        """Switch to economic screen."""
+        self.app.push_screen("economic")
+    
+    def action_show_screener(self):
+        """Switch to screener screen."""
+        self.app.push_screen("screener")
+    
+    def action_show_crypto(self):
+        """Switch to crypto screen."""
+        self.app.push_screen("crypto")
